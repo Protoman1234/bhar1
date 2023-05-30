@@ -1,34 +1,17 @@
 const MIN_COMPRESS_LENGTH = 1024;
+const MIN_TRANSPARENT_COMPRESS_LENGTH = MIN_COMPRESS_LENGTH * 2;
 
 function shouldCompress(req) {
-  const { originType, originSize, webp } = req.params;
+  const contentType = req.headers['content-type'] || '';
+  const contentLength = parseInt(req.headers['content-length'], 10) || 0;
+  const isImage = contentType.startsWith('image/');
+  const isTransparentWebP = isImage && contentType.endsWith('webp') && req.params.webp && !req.params.grayscale;
 
-  if (!originType.startsWith('image')) {
-    return false;
-  }
-  if (originSize === 0) {
-    return false;
-  }
-  if (webp && originSize < MIN_COMPRESS_LENGTH) {
-    return false;
-  }
-  if (
-    originType.endsWith('png') ||
-    (originType.endsWith('gif') && originSize < MIN_TRANSPARENT_COMPRESS_LENGTH)
-  ) {
-    return shouldCompressSmallImage(req);
-  }
-
-  return true;
-}
-
-function shouldCompressSmallImage(req) {
-  const { originType, originSize } = req.params;
-
-  if (originType.endsWith('gif') && originSize < 10240) {
+  if (isTransparentWebP && contentLength >= MIN_TRANSPARENT_COMPRESS_LENGTH) {
     return true;
   }
-  if (originType.endsWith('png') && originSize < 20480) {
+
+  if (isImage && contentLength >= MIN_COMPRESS_LENGTH) {
     return true;
   }
 
