@@ -1,3 +1,5 @@
+const MIN_COMPRESS_LENGTH = 1024;
+
 function shouldCompress(req) {
   const { originType, originSize, webp } = req.params;
 
