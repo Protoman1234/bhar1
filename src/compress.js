@@ -10,7 +10,7 @@ function compress(req, res, input) {
       quality: req.params.quality,
       progressive: true,
       optimizeScans: true,
-      concurrency: 1,
+      concurrency: 2,
     })
     .toBuffer((err, output, info) => {
       if (err || !info || res.headersSent) {
