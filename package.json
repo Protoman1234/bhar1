@@ -5,14 +5,14 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "start": "node app.js" // Changed from server.js to app.js
-  },
+    "start": "node app.js" 
+    
   "dependencies": {
     "basic-auth": "^2.0.1",
-    "express": "4.18.2", // Updated version
+    "express": "4.18.2",
     "lodash": "^4.17.21",
-    "request": "^2.88.2", // Updated version
-    "sharp": "^0.33.4" // Updated version
+    "request": "^2.88.2",
+    "sharp": "^0.33.4"
   },
   "engines": {
     "node": "22.x"
