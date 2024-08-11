@@ -6,11 +6,10 @@ function compress(req, res, input) {
 
   sharp(input)
     .grayscale(req.params.grayscale)
-    ///.resize({ width: Math.floor(Math.random() * 5) + 1 }) // Small random width adjustment
     .toFormat(format, {
       quality: req.params.quality,
       progressive: true,
-      optimizeScans: true
+      optimizeScans: true,
     })
     .toBuffer((err, output, info) => {
       if (err || !info || res.headersSent) {
