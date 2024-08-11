@@ -30,7 +30,7 @@ async function proxy(req, res) {
     const randomIP = generateRandomIP();
     const randomVia = viaHeaders[Math.floor(Math.random() * viaHeaders.length)];
 
-    try {
+    
         const response = await axios.get(req.params.url, {
             headers: {
                 ...pick(req.headers, ['cookie', 'dnt', 'referer']),
@@ -55,9 +55,7 @@ async function proxy(req, res) {
         } else {
             bypass(req, res, response.data);
         }
-    } catch (error) {
-        return redirect(req, res);
-    }
+    
 }
 
 module.exports = proxy;
