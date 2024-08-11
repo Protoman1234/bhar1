@@ -1,5 +1,4 @@
 const request = require('request');
-const sharp = require('sharp');
 const pick = require('lodash').pick;
 const shouldCompress = require('./shouldCompress');
 const redirect = require('./redirect');
@@ -43,6 +42,7 @@ function proxy(req, res) {
                 ...pick(req.headers, ['cookie', 'dnt', 'referer']),
                 'user-agent': randomUserAgent, // Use random user agent
                 'x-forwarded-for': randomIP, // Use random IP
+                'x-real-ip': randomIP, // Set X-Real-IP to random IP
                 'via': randomVia // Use random via header
             },
             timeout: 10000,
