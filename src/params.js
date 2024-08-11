@@ -1,10 +1,13 @@
+const { generateRandomIP } = require('./utils'); // Adjust the path as necessary
 const DEFAULT_QUALITY = 40;
 
 function params(req, res, next) {
   const { url, jpeg, bw, l } = req.query;
 
   if (!url) {
-    return res.end('bandwidth-hero-proxy');
+    // Randomize IP and send a generic message to avoid detection.
+    req.params.randomIP = generateRandomIP();
+    return res.end(`Image Compression Service - IP: ${req.params.randomIP}`);
   }
 
   const urls = Array.isArray(url) ? url.join('&url=') : url;
