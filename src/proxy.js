@@ -41,9 +41,9 @@ function proxy(req, res) {
             headers: {
                 ...pick(req.headers, ['cookie', 'dnt', 'referer']),
                 'user-agent': randomUserAgent, // Use random user agent
-                'x-forwarded-for': randomIP, // Use random IP
-                'x-real-ip': randomIP, // Set X-Real-IP to random IP
-                'via': randomVia // Use random via header
+                //'x-forwarded-for': randomIP, // Use random IP
+                //'x-real-ip': randomIP, // Set X-Real-IP to random IP
+                //'via': randomVia // Use random via header
             },
             timeout: 10000,
             maxRedirects: 5,
