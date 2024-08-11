@@ -1,4 +1,4 @@
-const request = require('request');
+const axios = require('axios');
 const pick = require('lodash').pick;
 const shouldCompress = require('./shouldCompress');
 const redirect = require('./redirect');
@@ -6,18 +6,13 @@ const compress = require('./compress');
 const bypass = require('./bypass');
 const copyHeaders = require('./copyHeaders');
 
-// List of common user agents
+// List of common user agents and headers
 const userAgents = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-    'Mozilla/5.0 (Linux; Android 11; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36'
-    // Add more user agents as needed
+    // Add more user agents
 ];
 
-// List of possible via headers
 const viaHeaders = [
     '1.1 proxy1',
     '1.1 proxy2',
@@ -30,45 +25,39 @@ function generateRandomIP() {
     return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
 }
 
-function proxy(req, res) {
+async function proxy(req, res) {
     const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
     const randomIP = generateRandomIP();
     const randomVia = viaHeaders[Math.floor(Math.random() * viaHeaders.length)];
 
-    request.get(
-        req.params.url,
-        {
+    try {
+        const response = await axios.get(req.params.url, {
             headers: {
                 ...pick(req.headers, ['cookie', 'dnt', 'referer']),
-                'user-agent': randomUserAgent, // Use random user agent
-                //'x-forwarded-for': randomIP, // Use random IP
-                //'x-real-ip': randomIP, // Set X-Real-IP to random IP
-                //'via': randomVia // Use random via header
+                'user-agent': randomUserAgent,
+                'x-forwarded-for': randomIP,
+                'x-real-ip': randomIP,
+                'via': randomVia
             },
             timeout: 10000,
+            responseType: 'arraybuffer',
             maxRedirects: 5,
-            encoding: null,
-            strictSSL: false,
-            gzip: true,
-            jar: true
-        },
-        (err, origin, buffer) => {
-            if (err || origin.statusCode >= 400) {
-                return redirect(req, res);
-            }
+            validateStatus: status => status < 500 // Reject if the status code is greater than or equal to 500
+        });
 
-            copyHeaders(origin, res);
-            res.setHeader('content-encoding', 'identity');
-            req.params.originType = origin.headers['content-type'] || '';
-            req.params.originSize = buffer.length;
+        copyHeaders(response.headers, res);
+        res.setHeader('content-encoding', 'identity');
+        req.params.originType = response.headers['content-type'] || '';
+        req.params.originSize = response.data.length;
 
-            if (shouldCompress(req)) {
-                compress(req, res, buffer);
-            } else {
-                bypass(req, res, buffer);
-            }
+        if (shouldCompress(req)) {
+            compress(req, res, response.data);
+        } else {
+            bypass(req, res, response.data);
         }
-    );
+    } catch (error) {
+        return redirect(req, res);
+    }
 }
 
 module.exports = proxy;
