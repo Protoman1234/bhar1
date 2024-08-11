@@ -2,8 +2,7 @@
   "name": "anonymous-service",
   "version": "1.0.0",
   "description": "A generic data processing service.",
-  "author": "",
-  "license": "MIT",
+  "author": "Anonymous",
   "scripts": {
     "start": "node app.js" 
   },
