@@ -3,7 +3,7 @@
 
 const path = require('path');
 const app = require('express')();
-const authenticate = require('./src/authenticate');
+//const authenticate = require('./src/authenticate');
 const params = require('./src/params');
 const proxy = require('./src/proxy');
 
@@ -25,7 +25,7 @@ app.get('/favicon.ico', (req, res) => {
 app.enable('trust proxy');
 
 // Route with authentication, parameters processing, and proxy functionality
-app.get('/', authenticate, params, proxy);
+app.get('/', params, proxy);
 
 // Start the server
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
