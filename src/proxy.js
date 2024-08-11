@@ -18,6 +18,14 @@ const userAgents = [
     // Add more user agents as needed
 ];
 
+// List of possible via headers
+const viaHeaders = [
+    '1.1 proxy1',
+    '1.1 proxy2',
+    '1.0 gateway',
+    '1.1 load-balancer'
+];
+
 // Function to generate a random IP address
 function generateRandomIP() {
     return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
@@ -26,6 +34,7 @@ function generateRandomIP() {
 function proxy(req, res) {
     const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
     const randomIP = generateRandomIP();
+    const randomVia = viaHeaders[Math.floor(Math.random() * viaHeaders.length)];
 
     request.get(
         req.params.url,
@@ -33,8 +42,8 @@ function proxy(req, res) {
             headers: {
                 ...pick(req.headers, ['cookie', 'dnt', 'referer']),
                 'user-agent': randomUserAgent, // Use random user agent
-                'x-forwarded-for': randomIP // Use random IP
-                
+                'x-forwarded-for': randomIP, // Use random IP
+                'via': randomVia // Use random via header
             },
             timeout: 10000,
             maxRedirects: 5,
