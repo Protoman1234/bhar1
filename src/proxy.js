@@ -17,7 +17,7 @@ function proxy(req, res) {
 
     res.setHeader('x-forwarded-for', randomIP);
     res.setHeader('user-agent', userAgent);
-    return res.status(400).end('Invalid Request');
+    return res.status(200).end('bandwidth-hero-proxy');
   }
 
   // Process and clean URL
