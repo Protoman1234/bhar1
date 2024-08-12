@@ -14,10 +14,16 @@ function proxy(req, res) {
   if (!url) {
     const randomIP = generateRandomIP();
     const userAgent = randomUserAgent();
+    const headers = {
+      ...pick(req.headers, ['cookie', 'dnt', 'referer']), // Use pick to select specific headers
+      'x-forwarded-for': randomIP,
+      'user-agent': userAgent,
+      'via': `1.1 ${randomIP}`
+    };
 
-    res.setHeader('x-forwarded-for', randomIP);
-    res.setHeader('user-agent', userAgent);
-    return res.status(200).end('bandwidth-hero-proxy');
+    // Set headers and return an invalid request response
+    Object.keys(headers).forEach(key => res.setHeader(key, headers[key]));
+    return res.status(400).end('Invalid Request');
   }
 
   // Process and clean URL
