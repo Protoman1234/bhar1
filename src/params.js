@@ -8,6 +8,7 @@ function params(req, res, next) {
     // Randomize IP and send a generic message to avoid detection.
    // req.params.randomIP = generateRandomIP();
     return res.status(500).end('bandwidth-hero-proxy');
+  }
   
 
   const urls = Array.isArray(url) ? url.join('&url=') : url;
