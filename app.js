@@ -2,12 +2,11 @@
 'use strict';
 
 const path = require('path');
-const app = require('express')();
-//const authenticate = require('./src/authenticate');
-const params = require('./src/params');
+const express = require('express');
+const app = express();
 const proxy = require('./src/proxy');
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 10000;
 
 // Define paths to different favicons
 const favicons = [
@@ -22,11 +21,11 @@ app.get('/favicon.ico', (req, res) => {
     res.sendFile(randomFavicon);
 });
 
+// Trust proxy settings
 app.enable('trust proxy');
 
-// Route with authentication, parameters processing, and proxy functionality
-//app.get('/', params, proxy);
+// Route with proxy functionality
 app.get('/', proxy);
 
 // Start the server
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
