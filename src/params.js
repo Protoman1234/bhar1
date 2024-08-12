@@ -19,10 +19,6 @@ function params(req, res, next) {
   req.params.grayscale = bw !== '0';
   req.params.quality = parseInt(l, 10) || DEFAULT_QUALITY;
 
-  // Optional: Add additional anonymization or header randomization logic here
-  req.headers['x-forwarded-for'] = generateRandomIP();
-  req.headers['user-agent'] = randomUserAgent();
-
   next();
 }
 
