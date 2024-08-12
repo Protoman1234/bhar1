@@ -10,19 +10,6 @@ const shouldCompress = require('./shouldCompress');
 function proxy(req, res) {
   const { url } = req.params;
 
-  // If the URL is missing or invalid, return a generic message with a randomized IP
-  if (!url) {
-    const randomIP = generateRandomIP();
-    const userAgent = randomUserAgent();
-
-    // Modify the headers for the response
-    res.setHeader('x-forwarded-for', randomIP);
-    res.setHeader('user-agent', userAgent);
-    res.setHeader('via', `1.1 ${randomIP}`);
-
-    return res.status(400).end(`Invalid Request - IP: ${randomIP}`);
-  }
-
   // Proceed with the original proxy logic
   const randomizedIP = generateRandomIP();
   const userAgent = randomUserAgent();
