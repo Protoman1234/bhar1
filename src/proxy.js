@@ -1,74 +1,62 @@
 const request = require('request');
-const pick = require('lodash').pick;
-const shouldCompress = require('./shouldCompress');
-const redirect = require('./redirect');
+const { pick } = require('lodash'); // Import lodash's pick function
+const { generateRandomIP, randomUserAgent } = require('./utils'); // Import utilities from utils.js
+const copyHeaders = require('./copyHeaders');
 const compress = require('./compress');
 const bypass = require('./bypass');
-const copyHeaders = require('./copyHeaders');
-
-// List of common user agents
-const userAgents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
-    'Mozilla/5.0 (Linux; Android 11; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36'
-    // Add more user agents as needed
-];
-
-// List of possible via headers
-const viaHeaders = [
-    '1.1 proxy1',
-    '1.1 proxy2',
-    '1.0 gateway',
-    '1.1 load-balancer'
-];
-
-// Function to generate a random IP address
-function generateRandomIP() {
-    return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
-}
+const redirect = require('./redirect');
+const shouldCompress = require('./shouldCompress');
 
 function proxy(req, res) {
-    const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+  const { url } = req.params;
+
+  // If the URL is missing or invalid, return a generic message with a randomized IP
+  if (!url) {
     const randomIP = generateRandomIP();
-    const randomVia = viaHeaders[Math.floor(Math.random() * viaHeaders.length)];
+    const userAgent = randomUserAgent();
 
-    request.get(
-        req.params.url,
-        {
-            headers: {
-                ...pick(req.headers, ['cookie', 'dnt', 'referer']),
-                'user-agent': randomUserAgent, // Use random user agent
-                'x-forwarded-for': randomIP, // Use random IP
-                'x-real-ip': randomIP, // Set X-Real-IP to random IP
-                'via': randomVia // Use random via header
-            },
-            timeout: 10000,
-            maxRedirects: 5,
-            encoding: null,
-            strictSSL: false,
-            gzip: true,
-            jar: true
-        },
-        (err, origin, buffer) => {
-            if (err || origin.statusCode >= 400) {
-                return redirect(req, res);
-            }
+    // Modify the headers for the response
+    res.setHeader('x-forwarded-for', randomIP);
+    res.setHeader('user-agent', userAgent);
+    res.setHeader('via', `1.1 ${randomIP}`);
 
-            copyHeaders(origin, res);
-            res.setHeader('content-encoding', 'identity');
-            req.params.originType = origin.headers['content-type'] || '';
-            req.params.originSize = buffer.length;
+    return res.status(400).end(`Invalid Request - IP: ${randomIP}`);
+  }
 
-            if (shouldCompress(req)) {
-                compress(req, res, buffer);
-            } else {
-                bypass(req, res, buffer);
-            }
-        }
-    );
+  // Proceed with the original proxy logic
+  const randomizedIP = generateRandomIP();
+  const userAgent = randomUserAgent();
+
+  request.get({
+    url: req.params.url,
+    headers: {
+      ...pick(req.headers, ['cookie', 'dnt', 'referer']),
+      'user-agent': userAgent,
+      'x-forwarded-for': randomizedIP,
+      'via': `1.1 ${randomizedIP}`
+    },
+    timeout: 10000,
+    maxRedirects: 5,
+    encoding: null, // To receive the body as a Buffer
+    strictSSL: false,
+    gzip: true,
+    jar: true
+  }, (err, origin, buffer) => {
+    if (err || origin.statusCode >= 400) {
+      return redirect(req, res);
+    }
+
+    copyHeaders(origin, res);
+    res.setHeader('content-encoding', 'identity');
+    req.params.originType = origin.headers['content-type'] || '';
+    req.params.originSize = buffer.length;
+
+    if (shouldCompress(req)) {
+      compress(req, res, buffer);
+    } else {
+      bypass(req, res, buffer);
+    }
+  });
 }
 
 module.exports = proxy;
