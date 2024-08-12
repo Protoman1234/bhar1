@@ -23,7 +23,7 @@ function proxy(req, res) {
 
     // Set headers and return an invalid request response
     Object.keys(headers).forEach(key => res.setHeader(key, headers[key]));
-    return res.status(200).end('bandwidth-hero-proxy');
+    return res.end('bandwidth-hero-proxy');
   }
 
   // Process and clean URL
