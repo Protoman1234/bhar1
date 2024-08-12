@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 10000;
 const favicons = [
     path.join(__dirname, 'public', 'favicon1.ico'),
     path.join(__dirname, 'public', 'favicon2.ico'),
-    path.join(__dirname, 'public', 'favicon3.ico'),
+    //path.join(__dirname, 'public', 'favicon3.ico'),
 ];
 
 // Route to serve a random favicon from the list
