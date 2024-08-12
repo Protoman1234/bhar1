@@ -1,6 +1,6 @@
 const request = require('request');
-const { pick } = require('lodash'); // Import lodash's pick function
-const { generateRandomIP, randomUserAgent } = require('./utils'); // Import utilities from utils.js
+const { pick } = require('lodash'); // Import pick from lodash
+const { generateRandomIP, randomUserAgent } = require('./utils'); 
 const copyHeaders = require('./copyHeaders');
 const compress = require('./compress');
 const bypass = require('./bypass');
@@ -8,9 +8,28 @@ const redirect = require('./redirect');
 const shouldCompress = require('./shouldCompress');
 
 function proxy(req, res) {
-  const { url } = req.params;
+  const { url, jpeg, bw, l } = req.query;
 
-  // Proceed with the original proxy logic
+  // Handle the case where `url` is missing
+  if (!url) {
+    const randomIP = generateRandomIP();
+    const userAgent = randomUserAgent();
+
+    res.setHeader('x-forwarded-for', randomIP);
+    res.setHeader('user-agent', userAgent);
+    return res.status(400).end('Invalid Request');
+  }
+
+  // Process and clean URL
+  const urls = Array.isArray(url) ? url.join('&url=') : url;
+  const cleanedUrl = urls.replace(/http:\/\/1\.1\.\d\.\d\/bmi\/(https?:\/\/)?/i, 'http://');
+
+  // Setup request parameters
+  req.params.url = cleanedUrl;
+  req.params.webp = !jpeg;
+  req.params.grayscale = bw !== '0';
+  req.params.quality = parseInt(l, 10) || 40;
+
   const randomizedIP = generateRandomIP();
   const userAgent = randomUserAgent();
 
@@ -24,7 +43,7 @@ function proxy(req, res) {
     },
     timeout: 10000,
     maxRedirects: 5,
-    encoding: null, // To receive the body as a Buffer
+    encoding: null,
     strictSSL: false,
     gzip: true,
     jar: true
