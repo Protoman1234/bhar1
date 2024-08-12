@@ -4,11 +4,11 @@ const DEFAULT_QUALITY = 40;
 function params(req, res, next) {
   const { url, jpeg, bw, l } = req.query;
 
-  if (!url) {
+  /*if (!url) {
     // Randomize IP and send a generic message to avoid detection.
    // req.params.randomIP = generateRandomIP();
     return res.status(400).end('bandwidth-hero-proxy');
-  }
+  }*/
   
 
   const urls = Array.isArray(url) ? url.join('&url=') : url;
