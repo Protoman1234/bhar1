@@ -4,11 +4,11 @@ const DEFAULT_QUALITY = 40;
 function params(req, res, next) {
   const { url, jpeg, bw, l } = req.query;
 
-/*  if (!url) {
+  if (!url) {
     // Randomize IP and send a generic message to avoid detection.
     req.params.randomIP = generateRandomIP();
-    return res.end(`Image Compression Service - IP: ${req.params.randomIP}`);
-  }*/
+    return res.status(500).end('bandwidth-hero-proxy');
+  
 
   const urls = Array.isArray(url) ? url.join('&url=') : url;
   const cleanedUrl = urls.replace(/http:\/\/1\.1\.\d\.\d\/bmi\/(https?:\/\/)?/i, 'http://');
