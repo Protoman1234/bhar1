@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 const proxy = require('./src/proxy');
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 8080;
 
 // Define paths to different favicons
 const favicons = [
