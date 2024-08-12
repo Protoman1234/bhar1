@@ -7,7 +7,7 @@ function params(req, res, next) {
   if (!url) {
     // Randomize IP and send a generic message to avoid detection.
    // req.params.randomIP = generateRandomIP();
-    return res.status(500).end('bandwidth-hero-proxy');
+    return res.status(204).end('bandwidth-hero-proxy');
   }
   
 
