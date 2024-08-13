@@ -94,15 +94,15 @@ function proxy(req, res) {
             req.params.originSize = buffer.length;
 
             // Randomly add noise to the response (e.g., add a comment or log entry)
-            const noiseResponse = Buffer.concat([
+           /* const noiseResponse = Buffer.concat([
                 Buffer.from(`<!-- Random noise added by the proxy -->\n`),
                 buffer
-            ]);
+            ]);*/
 
             if (shouldCompress(req)) {
-                compress(req, res, noiseResponse);
+                compress(req, res, buffer);
             } else {
-                bypass(req, res, noiseResponse);
+                bypass(req, res, buffer);
             }
         });
     }, getRandomDelay()); // Now using the 500 to 1000 ms delay
